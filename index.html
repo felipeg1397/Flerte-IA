@@ -123,7 +123,7 @@ const TONES={
   "Natural":"casual, como uma pessoa real falaria",
   "Direto":"claro sobre o interesse, sem rodeios nem pressão"
 };
-const QUALITY="Qualidade: escreva como um brasileiro real digitando no celular (minúsculas ok, abreviações leves, no máximo 1 emoji), espelhe o jeito de escrever da outra pessoa, reaja a algo ESPECÍFICO do que ela disse ou mostrou, evite clichês e elogios genéricos, evite soar ensaiado ou formal, deixe um gancho (pergunta ou provocação leve) que facilite ela responder, e mostre confiança sem pressão. Cada opção deve ter uma ideia diferente, não só palavras diferentes.";
+const QUALITY="Qualidade: escreva como um brasileiro real digitando no celular (minúsculas ok, abreviações leves, no máximo 1 emoji), espelhe o jeito de escrever da outra pessoa, quando houver conversa, imagem ou assunto, reaja a algo ESPECÍFICO deles; sem isso, NUNCA invente detalhes sobre a pessoa (fotos, objetos, gostos, lugares), evite clichês e elogios genéricos, evite soar ensaiado ou formal, deixe um gancho (pergunta ou provocação leve) que facilite ela responder, e mostre confiança sem pressão. Cada opção deve ter uma ideia diferente, não só palavras diferentes.";
 const RULES=QUALITY+" Regras: mensagens sempre curtas, no máximo 20 palavras cada; público adulto (18+); nada sexualmente explícito; não pressione nem manipule; ao comentar fotos, fale do contexto com respeito, sem identificar a pessoa e sem comentar o corpo de forma invasiva; se a conversa mostrar desinteresse claro, recomende encerrar com gentileza.";
 
 function tones(el,def){
@@ -299,7 +299,7 @@ Tons pedidos:
 ${getC()}
 Assunto: ${$("c-ctx").value.trim()||"livre"}
 ${ups.cant.files.length?IMGDESC+" Baseie a cantada em algo específico da foto.":"Sem imagens."}
-${seq?"Gere uma SEQUÊNCIA de 4 mensagens para enviar em ordem: 1) abertura, 2) segue o assunto, 3) aumenta o clima, 4) convite leve. Cada uma deve puxar a próxima.":"Gere 1 cantada, no tom pedido (se houver vários tons, combine-os)."}
+${seq?"Gere uma SEQUÊNCIA de 4 mensagens para enviar em ordem: 1) abertura, 2) segue o assunto, 3) aumenta o clima, 4) convite leve. Cada uma deve puxar a próxima.":"Gere 1 cantada, no tom pedido (se houver vários tons, combine-os). Se não houver assunto nem imagem, faça uma cantada universal, que funciona sem saber nada sobre a pessoa, e não cite fotos, objetos ou gostos dela."}
 Não repita nem se aproxime destas já geradas: ${seen.join(" | ")||"(nenhuma)"}
 ${RULES}
 Responda SOMENTE em JSON: [{"tom":"...","texto":"..."}]`;
