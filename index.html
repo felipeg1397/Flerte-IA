@@ -121,10 +121,12 @@ const TONES={
   "Sedutor":"tensão romântica elegante e sugestiva, nada explícito",
   "Charmoso":"gentil, atencioso, com elogio específico e sincero",
   "Natural":"casual, como uma pessoa real falaria",
-  "Direto":"claro sobre o interesse, sem rodeios nem pressão"
+  "Direto":"claro sobre o interesse, sem rodeios nem pressão",
+  "Poético-Cômico":"romântico exagerado com uma virada de humor no final",
+  "Nerd":"referências a tecnologia, ciência, jogos e cinema, de forma leve"
 };
 const QUALITY="Qualidade: escreva como um brasileiro real digitando no celular (minúsculas ok, abreviações leves, no máximo 1 emoji), espelhe o jeito de escrever da outra pessoa, quando houver conversa, imagem ou assunto, reaja a algo ESPECÍFICO deles; sem isso, NUNCA invente detalhes sobre a pessoa (fotos, objetos, gostos, lugares), evite clichês e elogios genéricos, evite soar ensaiado ou formal, deixe um gancho (pergunta ou provocação leve) que facilite ela responder, e mostre confiança sem pressão. Cada opção deve ter uma ideia diferente, não só palavras diferentes.";
-const RULES=QUALITY+" Regras: mensagens sempre curtas, no máximo 20 palavras cada; público adulto (18+); nada sexualmente explícito; não pressione nem manipule; ao comentar fotos, fale do contexto com respeito, sem identificar a pessoa e sem comentar o corpo de forma invasiva; se a conversa mostrar desinteresse claro, recomende encerrar com gentileza.";
+const RULES=QUALITY+" Regras: mensagens sempre curtas, no máximo 25 palavras cada; público adulto (18+); nada sexualmente explícito; não pressione nem manipule; ao comentar fotos, fale do contexto com respeito, sem identificar a pessoa e sem comentar o corpo de forma invasiva; se a conversa mostrar desinteresse claro, recomende encerrar com gentileza.";
 
 function tones(el,def){
   const s=new Set([def]);
@@ -192,7 +194,7 @@ async function ask(prompt,imgs,msg){
   }catch(e){msg.textContent="Falha de rede ao chamar o servidor: "+e.message;return null}
   let j;
   try{j=JSON.parse(txt)}
-  catch(e){msg.textContent="O servidor respondeu "+res.status+" sem dados válidos. Provavelmente a pasta api não foi publicada: confira o repositório.";return null}
+  catch(e){msg.textContent="O servidor respondeu "+res.status+" sem dados válidos. Tente de novo.";return null}
   if(!res.ok){msg.textContent=j.error||("Erro "+res.status);return null}
   try{return parse(j.text)}
   catch(e){msg.textContent="A IA respondeu num formato inesperado. Tente de novo.";return null}
@@ -294,7 +296,14 @@ async function cantadas(fresh){
   if(fresh){out.innerHTML="";seen.length=0}
   $("c-more").classList.add("hide");
   await run($("c-go"),msg,out,async()=>{
-    const prompt=`Você escreve cantadas criativas, nada clichê, para paquera entre adultos. Português do Brasil.
+    const prompt=`Você é um humorista que escreve cantadas inteligentes e engraçadas para paquera entre adultos. Português do Brasil.
+Nível de qualidade exigido. Exemplos de referência (NÃO copie nem reaproveite a estrutura deles):
+- "Eu tinha pensado numa cantada genial de cinema, mas fiquei tão impressionado que esqueci o roteiro."
+- "Estudos apontam que responder a esta mensagem aumenta em 80% as chances do seu final de semana ser incrível."
+- "Você não é atualização de sistema, mas parou completamente tudo o que eu estava fazendo."
+O que faz essas cantadas boas: uma virada inesperada no final; autoironia ou meta-humor (quem escreve admite que travou); falsa ciência ou estatística; analogias do dia a dia ou da tecnologia viradas do avesso; elogio embutido de forma indireta; soam leves e naturais, de alguém confiante e bem-humorado.
+Evite: clichês de cantada (anjo, caiu do céu, roubou meu coração, mapa, "está sentindo falta de..."), elogio direto ao corpo, trocadilho forçado, texto longo e explicar a piada.
+Use uma técnica diferente em cada cantada. Pense em várias ideias e entregue só as melhores.
 Tons pedidos:
 ${getC()}
 Assunto: ${$("c-ctx").value.trim()||"livre"}
