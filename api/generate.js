@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
     const j = await r.json();
     if (!r.ok) {
       console.error("Gemini erro", r.status, JSON.stringify(j).slice(0, 500));
-      return res.status(502).json({ error: r.status === 429 ? "A IA gratuita está no limite agora. Tente em instantes." : "Erro ao falar com a IA." });
+      return res.status(502).json({ error: r.status === 429 ? "A IA gratuita está no limite agora. Tente em instantes." : "Erro ao falar com a IA (" + r.status + "): " + String(j.error?.message || "").slice(0, 200) });
     }
     const text = (j.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
     if (!text) return res.status(502).json({ error: "A IA não devolveu resposta. Tente de novo." });
