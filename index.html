@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flerte IA</title>
+<style>
+:root{--bg:#fff7f5;--card:#fff;--tx:#2a1a1f;--mu:#7a6268;--ac:#e0446a;--ac2:#fbe0e7;--bd:#f0d5dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1013;--card:#26171c;--tx:#f6e9ed;--mu:#b39aa2;--ac:#ff6b8e;--ac2:#4a2230;--bd:#3d2630}}
+:root[data-theme="dark"]{--bg:#1a1013;--card:#26171c;--tx:#f6e9ed;--mu:#b39aa2;--ac:#ff6b8e;--ac2:#4a2230;--bd:#3d2630}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.6rem;margin:0 0 4px}
+.sub{color:var(--mu);margin:0 0 16px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.mode{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:14px;padding:10px 6px;font:inherit;cursor:pointer;text-align:center;font-size:.9rem}
+.mode b{display:block;font-size:1.3rem}
+.mode[aria-selected=true]{background:var(--ac);border-color:var(--ac);color:#fff}
+.desc{color:var(--mu);margin:0 0 14px;font-size:.92rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:14px}
+label.t{display:block;font-weight:600;font-size:.9rem;margin-bottom:8px}
+textarea,input[type=text]{width:100%;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;padding:10px;font:inherit;resize:vertical}
+.drop{display:flex;align-items:center;justify-content:center;border:2px dashed var(--bd);border-radius:12px;padding:16px;color:var(--mu);cursor:pointer;text-align:center}
+.drop input{display:none}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.thumbs img{width:96px;height:96px;object-fit:cover;border-radius:10px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:8px 14px;border-radius:999px;font:inherit;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:#fff}
+.go{width:100%;border:0;background:var(--ac);color:#fff;font:inherit;font-weight:700;padding:14px;border-radius:12px;cursor:pointer}
+.go.alt{background:var(--ac2);color:var(--tx);margin-top:10px}
+.go:disabled{opacity:.6;cursor:wait}
+.sw{display:flex;align-items:center;gap:10px;margin-top:14px;cursor:pointer}
+.msg{color:var(--mu);text-align:center;margin:10px 0}
+.opt{border-left:4px solid var(--ac);background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;border-top:1px solid var(--bd);border-right:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+.opt small{color:var(--ac);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.opt p{margin:4px 0 8px;white-space:pre-wrap}
+.cp{border:1px solid var(--bd);background:var(--ac2);color:var(--tx);border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer}
+.ana h3{margin:0 0 6px;font-size:1rem}
+.ana ul{margin:0 0 10px;padding-left:20px}
+.badge{display:inline-block;background:var(--ac);color:#fff;border-radius:999px;padding:2px 12px;font-weight:700;font-size:.85rem}
+.note{font-size:.8rem;color:var(--mu);text-align:center;margin-top:18px}
+.hide{display:none}
+.opt{cursor:pointer}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hint{color:var(--mu);font-size:.8rem}
+.sub{margin-left:16px}
+.sub .msg{margin:4px 0 10px}
+</style>
+</head>
+<body>
+<main>
+  <h1>💬 Flerte IA</h1>
+  <p class="sub">Escolha o que você precisa agora.</p>
+  <div class="modes" role="tablist">
+    <button class="mode" role="tab" data-m="resp" aria-selected="true"><b>✍️</b>Sugestão de Respostas</button>
+    <button class="mode" role="tab" data-m="ana" aria-selected="false"><b>🔍</b>Análise da Conversa</button>
+    <button class="mode" role="tab" data-m="cant" aria-selected="false"><b>😏</b>Gerador de Cantadas</button>
+  </div>
+
+  <section id="p-resp">
+    <p class="desc">Envie um print, receba uma análise e sugestões de respostas. Você pode colar a imagem (Ctrl+V) ou anexar.</p>
+    <div class="card">
+      <label class="t">Print da conversa e/ou story dela(e)</label>
+      <label class="drop"><input type="file" accept="image/*" multiple><span class="dt"></span></label>
+      <div class="thumbs"></div>
+      <label class="t" style="margin-top:14px">Contexto (opcional)</label>
+      <textarea rows="2" id="r-ctx" placeholder="Ex.: ela é minha colega de faculdade, quero chamar para sair"></textarea>
+    </div>
+    <div class="card">
+      <label class="t">Tom (escolha um ou mais)</label>
+      <div class="chips" id="r-tones"></div>
+      <label class="t" style="margin-top:14px">Seu jeito de falar (opcional)</label>
+      <input type="text" id="r-me" placeholder="Ex.: gírias, poucos emojis, frases curtas">
+    </div>
+    <button class="go" id="r-go">Analisar e sugerir respostas</button>
+    <div class="msg" id="r-msg"></div><div id="r-out"></div>
+  </section>
+
+  <section id="p-ana" class="hide">
+    <p class="desc">Envie o print e a IA lê os sinais: nível de interesse, pontos de atenção e o melhor próximo passo.</p>
+    <div class="card">
+      <label class="t">Print da conversa</label>
+      <label class="drop"><input type="file" accept="image/*" multiple><span class="dt"></span></label>
+      <div class="thumbs"></div>
+      <label class="t" style="margin-top:14px">Contexto (opcional)</label>
+      <textarea rows="2" id="a-ctx" placeholder="Ex.: a gente se conheceu num app há uma semana"></textarea>
+    </div>
+    <button class="go" id="a-go">Analisar conversa</button>
+    <div class="msg" id="a-msg"></div><div id="a-out"></div>
+  </section>
+
+  <section id="p-cant" class="hide">
+    <p class="desc">Gere cantadas por tom. Use “Gerar mais” para novas opções ou ative a sequência para uma conversa em etapas.</p>
+    <div class="card">
+      <label class="t">Tom (escolha um ou mais)</label>
+      <div class="chips" id="c-tones"></div>
+      <label class="t">Foto ou story dela(e) como inspiração (opcional)</label>
+      <label class="drop"><input type="file" accept="image/*" multiple><span class="dt"></span></label>
+      <div class="thumbs"></div>
+      <label class="t" style="margin-top:14px">Sobre o quê? (opcional)</label>
+      <input type="text" id="c-ctx" placeholder="Ex.: ela ama café e gatos">
+      <label class="sw"><input type="checkbox" id="c-seq"> <span><b>Cantadas em sequência</b>: 4 mensagens para mandar em ordem, cada uma puxando a próxima</span></label>
+    </div>
+    <button class="go" id="c-go">Gerar cantada</button>
+    <div class="msg" id="c-msg"></div><div id="c-out"></div>
+    <button class="go alt hide" id="c-more">➕ Gerar mais</button>
+  </section>
+
+  <p class="note">Para maiores de 18 anos. Se a outra pessoa não demonstrou interesse, o melhor é encerrar com gentileza.</p>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const TONES={
+  "Engraçado":"humor leve e inteligente, sem ofender",
+  "Sutil":"indireta discreta, intenção nas entrelinhas",
+  "Provocante":"brincadeira ousada e confiante, com desafio simpático",
+  "Sedutor":"tensão romântica elegante e sugestiva, nada explícito",
+  "Charmoso":"gentil, atencioso, com elogio específico e sincero",
+  "Natural":"casual, como uma pessoa real falaria",
+  "Direto":"claro sobre o interesse, sem rodeios nem pressão"
+};
+const QUALITY="Qualidade: escreva como um brasileiro real digitando no celular (minúsculas ok, abreviações leves, no máximo 1 emoji), espelhe o jeito de escrever da outra pessoa, reaja a algo ESPECÍFICO do que ela disse ou mostrou, evite clichês e elogios genéricos, evite soar ensaiado ou formal, deixe um gancho (pergunta ou provocação leve) que facilite ela responder, e mostre confiança sem pressão. Cada opção deve ter uma ideia diferente, não só palavras diferentes.";
+const RULES=QUALITY+" Regras: mensagens sempre curtas, no máximo 20 palavras cada; público adulto (18+); nada sexualmente explícito; não pressione nem manipule; ao comentar fotos, fale do contexto com respeito, sem identificar a pessoa e sem comentar o corpo de forma invasiva; se a conversa mostrar desinteresse claro, recomende encerrar com gentileza.";
+
+function tones(el,def){
+  const s=new Set([def]);
+  Object.keys(TONES).forEach(t=>{
+    const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=t;
+    b.setAttribute("aria-pressed",s.has(t));
+    b.onclick=()=>{s.has(t)?s.delete(t):s.add(t);b.setAttribute("aria-pressed",s.has(t))};
+    el.appendChild(b);
+  });
+  return ()=>[...s].map(t=>`- ${t}: ${TONES[t]}`).join("\n");
+}
+
+const DT="📷 Toque para anexar (até 3 imagens) ou cole com Ctrl+V";
+const ups={};
+function uploader(sec){
+  const inp=sec.querySelector("input[type=file]"),th=sec.querySelector(".thumbs"),dt=sec.querySelector(".dt");
+  const files=[];
+  function draw(){
+    th.innerHTML="";
+    files.forEach((f,i)=>{
+      const im=document.createElement("img");im.src=URL.createObjectURL(f);im.alt="Imagem "+(i+1);im.title="Toque para remover";
+      im.onclick=()=>{files.splice(i,1);draw()};th.appendChild(im);
+    });
+    dt.textContent=files.length?"✅ "+files.length+" imagem(ns). Toque para adicionar mais ou na miniatura para remover":DT;
+  }
+  function add(list){for(const f of list){if(files.length<3&&f.type.startsWith("image/"))files.push(f)}draw()}
+  inp.onchange=e=>{add(e.target.files);e.target.value=""};
+  draw();
+  return {files,add};
+}
+ups.resp=uploader($("p-resp"));ups.ana=uploader($("p-ana"));ups.cant=uploader($("p-cant"));
+
+let mode="resp";
+document.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{
+  mode=b.dataset.m;
+  document.querySelectorAll(".mode").forEach(x=>x.setAttribute("aria-selected",x===b));
+  ["resp","ana","cant"].forEach(m=>$("p-"+m).classList.toggle("hide",m!==mode));
+});
+document.addEventListener("paste",e=>{
+  if(!ups[mode])return;
+  const fs=[...(e.clipboardData?.files||[])];
+  if(fs.length){ups[mode].add(fs);e.preventDefault()}
+});
+
+function parse(t){
+  t=t.replace(/```json|```/g,"");
+  const s=t.search(/[\[{]/),e=Math.max(t.lastIndexOf("]"),t.lastIndexOf("}"));
+  return JSON.parse(t.slice(s,e+1));
+}
+async function shrink(f){
+  const bm=await createImageBitmap(f);
+  const k=Math.min(1,1024/Math.max(bm.width,bm.height));
+  const c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);
+  c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+  return c.toDataURL("image/jpeg",0.8).split(",")[1];
+}
+async function ask(prompt,imgs,msg){
+  try{
+    const images=[];for(const f of imgs)images.push(await shrink(f));
+    const res=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,images})});
+    const j=await res.json();
+    if(!res.ok){msg.textContent=j.error||"Não consegui gerar agora. Tente de novo.";return null}
+    return parse(j.text);
+  }catch(e){msg.textContent="Não consegui gerar agora. Tente de novo.";return null}
+}
+function opt(out,label,text,src,chain){
+  chain=chain||[];
+  const d=document.createElement("div");d.className="opt";
+  const s=document.createElement("small");s.textContent=label;
+  const p=document.createElement("p");p.textContent=text;
+  const h=document.createElement("span");h.className="hint";h.textContent="Toque para copiar";
+  const k=document.createElement("button");k.className="cp";k.textContent="➡️ Continuar";
+  const bar=document.createElement("div");bar.className="bar";
+  const sub=document.createElement("div");sub.className="sub";
+  d.onclick=async()=>{try{await navigator.clipboard.writeText(text);h.textContent="Copiado ✓"}catch(e){h.textContent="Selecione e copie"}setTimeout(()=>h.textContent="Toque para copiar",1500)};
+  k.onclick=async ev=>{
+    ev.stopPropagation();
+    k.disabled=true;k.textContent="Pensando…";
+    const ctx=(src==="resp"?$("r-ctx"):$("c-ctx")).value.trim();
+    const hist=[...chain,text].map((x,i)=>(i+1)+". "+x).join("\n");
+    const prompt=`Você ajuda alguém a manter uma conversa de paquera fluindo. Português do Brasil.
+${ups[src].files.length?IMGDESC:"Sem imagens."}
+Contexto: ${ctx||"(nenhum)"}
+Mensagens que a pessoa já planeja mandar, em ordem:
+${hist}
+Tom a manter: ${label}
+Escreva 3 opções diferentes para a PRÓXIMA mensagem, que dê continuidade natural ao que foi dito: mantenha o papo vivo, aprofunde o assunto e, quando fizer sentido, avance para um convite leve. Não repita as mensagens acima.
+${RULES}
+Responda SOMENTE em JSON: [{"tom":"...","texto":"..."}]`;
+    const m=document.createElement("div");m.className="msg";
+    const r=await ask(prompt,ups[src].files,m);
+    k.disabled=false;k.textContent="➡️ Continuar";
+    sub.innerHTML="";
+    if(!r){sub.appendChild(m);return}
+    r.forEach(o=>opt(sub,o.tom,o.texto,src,[...chain,text]));
+  };
+  bar.append(h,k);d.append(s,p,bar);out.append(d,sub);
+}
+function card(out,title,items,isList){
+  const h=document.createElement("h3");h.textContent=title;out.appendChild(h);
+  if(isList){const u=document.createElement("ul");(items||[]).forEach(x=>{const l=document.createElement("li");l.textContent=x;u.appendChild(l)});out.appendChild(u)}
+  else{const p=document.createElement("p");p.textContent=items||"";p.style.margin="0 0 10px";out.appendChild(p)}
+}
+const IMGDESC="Para cada imagem enviada, identifique sozinho se é print de conversa (leia mensagens e contexto) ou story/foto da outra pessoa (observe lugar, atividade, pet, estilo e clima e use como gancho).";
+
+const getR=tones($("r-tones"),"Natural"),getC=tones($("c-tones"),"Charmoso");
+
+async function run(btn,msg,out,job){
+  msg.textContent="Pensando…";btn.disabled=true;
+  try{await job()}finally{btn.disabled=false}
+}
+
+$("r-go").onclick=()=>{
+  const imgs=ups.resp.files,ctx=$("r-ctx").value.trim(),msg=$("r-msg"),out=$("r-out");
+  if(!imgs.length&&!ctx){msg.textContent="Envie um print ou escreva o contexto.";return}
+  run($("r-go"),msg,out,async()=>{
+    out.innerHTML="";
+    const prompt=`Você é um assistente de conversa para paquera. Responda em português do Brasil.
+${imgs.length?IMGDESC:"Não há imagens."}
+Contexto da pessoa: ${ctx||"(nenhum)"}
+Jeito de falar dela: ${$("r-me").value.trim()||"natural"}
+Tons pedidos:
+${getR()}
+Faça: 1) uma análise curta (1 a 2 frases) do que a outra pessoa quis dizer e do clima da conversa; 2) 2 sugestões de resposta por tom, ambas curtas (até 15 palavras), soando como chat real, sem aspas.
+${RULES}
+Responda SOMENTE em JSON: {"analise":"...","sugestoes":[{"tom":"...","texto":"..."}]}`;
+    const r=await ask(prompt,imgs,msg);if(!r)return;
+    msg.textContent="";
+    const a=document.createElement("div");a.className="card ana";card(a,"🔍 Análise",r.analise);out.appendChild(a);
+    (r.sugestoes||[]).forEach(o=>opt(out,o.tom,o.texto,"resp"));
+  });
+};
+
+$("a-go").onclick=()=>{
+  const imgs=ups.ana.files,ctx=$("a-ctx").value.trim(),msg=$("a-msg"),out=$("a-out");
+  if(!imgs.length){msg.textContent="Envie ao menos um print da conversa.";return}
+  run($("a-go"),msg,out,async()=>{
+    out.innerHTML="";
+    const prompt=`Você analisa conversas de paquera com honestidade e gentileza. Responda em português do Brasil.
+${IMGDESC}
+Contexto: ${ctx||"(nenhum)"}
+Dê uma nota de 0 a 10 ao interesse da outra pessoa e avalie também os sinais positivos, os pontos de atenção e o melhor próximo passo. Seja honesto: não invente interesse que não aparece. Seja breve: resumo em 1 ou 2 frases e no máximo 3 itens curtos em cada lista.
+${RULES}
+Responda SOMENTE em JSON: {"resumo":"...","nota":0,"interesse":"baixo|médio|alto","sinais":["..."],"atencao":["..."],"proximo_passo":"..."}`;
+    const r=await ask(prompt,imgs,msg);if(!r)return;
+    msg.textContent="";
+    const c=document.createElement("div");c.className="card ana";
+    const b=document.createElement("span");b.className="badge";b.textContent="Interesse: "+(r.nota!=null?r.nota+"/10 · ":"")+(r.interesse||"?");
+    c.appendChild(b);
+    const sp=document.createElement("div");sp.style.height="10px";c.appendChild(sp);
+    card(c,"Resumo",r.resumo);card(c,"✅ Sinais positivos",r.sinais,true);
+    card(c,"⚠️ Pontos de atenção",r.atencao,true);card(c,"➡️ Próximo passo",r.proximo_passo);
+    out.appendChild(c);
+  });
+};
+
+const seen=[];
+async function cantadas(fresh){
+  const msg=$("c-msg"),out=$("c-out"),seq=$("c-seq").checked;
+  if(fresh){out.innerHTML="";seen.length=0}
+  $("c-more").classList.add("hide");
+  await run($("c-go"),msg,out,async()=>{
+    const prompt=`Você escreve cantadas criativas, nada clichê, para paquera entre adultos. Português do Brasil.
+Tons pedidos:
+${getC()}
+Assunto: ${$("c-ctx").value.trim()||"livre"}
+${ups.cant.files.length?IMGDESC+" Baseie a cantada em algo específico da foto.":"Sem imagens."}
+${seq?"Gere uma SEQUÊNCIA de 4 mensagens para enviar em ordem: 1) abertura, 2) segue o assunto, 3) aumenta o clima, 4) convite leve. Cada uma deve puxar a próxima.":"Gere 1 cantada, no tom pedido (se houver vários tons, combine-os)."}
+Não repita nem se aproxime destas já geradas: ${seen.join(" | ")||"(nenhuma)"}
+${RULES}
+Responda SOMENTE em JSON: [{"tom":"...","texto":"..."}]`;
+    const r=await ask(prompt,ups.cant.files,msg);if(!r)return;
+    msg.textContent="";
+    if(seq){const h=document.createElement("h3");h.textContent="Sequência "+(out.querySelectorAll("h3").length+1);h.style.margin="14px 0 8px";out.appendChild(h)}
+    r.forEach((o,i)=>{seen.push(o.texto);opt(out,seq?"Passo "+(i+1)+" · "+o.tom:o.tom,o.texto,"cant")});
+    $("c-more").classList.remove("hide");
+  });
+}
+$("c-go").onclick=()=>cantadas(true);
+$("c-more").onclick=()=>cantadas(false);
+$("c-seq").onchange=()=>{$("c-go").textContent=$("c-seq").checked?"Gerar sequência":"Gerar cantada"};
+</script>
+</body>
+</html>
