@@ -16,28 +16,41 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "Pedido inválido" });
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+  const models = [process.env.GEMINI_MODEL || "gemini-3.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
   const parts = [{ text: prompt }, ...images.map((d) => ({ inlineData: { mimeType: "image/jpeg", data: d } }))];
+  const body = JSON.stringify({
+    contents: [{ role: "user", parts }],
+    generationConfig: { responseMimeType: "application/json", temperature: 1 },
+  });
 
-  try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts }],
-        generationConfig: { responseMimeType: "application/json", temperature: 1 },
-      }),
-    });
-    const j = await r.json();
-    if (!r.ok) {
-      console.error("Gemini erro", r.status, JSON.stringify(j).slice(0, 500));
-      return res.status(502).json({ error: r.status === 429 ? "A IA gratuita está no limite agora. Tente em instantes." : "Erro ao falar com a IA (" + r.status + "): " + String(j.error?.message || "").slice(0, 200) });
+  let last = null;
+  for (const model of models) {
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
+        body,
+      });
+      const j = await r.json();
+      if (r.ok) {
+        const text = (j.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
+        if (text) return res.status(200).json({ text });
+        last = { status: 502, msg: "A IA não devolveu resposta." };
+        continue;
+      }
+      console.error("Gemini erro", model, r.status, JSON.stringify(j).slice(0, 400));
+      last = { status: r.status, msg: String(j.error?.message || "").slice(0, 150) };
+      if (![429, 500, 503, 404].includes(r.status)) break; // erro de chave ou pedido: não adianta trocar de modelo
+    } catch (e) {
+      console.error(e);
+      last = { status: 500, msg: "Falha de conexão." };
     }
-    const text = (j.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
-    if (!text) return res.status(502).json({ error: "A IA não devolveu resposta. Tente de novo." });
-    res.status(200).json({ text });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Erro inesperado. Tente de novo." });
   }
+
+  const busy = last && [429, 503].includes(last.status);
+  res.status(502).json({
+    error: busy
+      ? "A IA gratuita está com muita procura agora. Tente de novo em alguns instantes."
+      : "Erro ao falar com a IA (" + (last?.status || "?") + "): " + (last?.msg || ""),
+  });
 };
